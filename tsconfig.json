@@ -9,6 +9,7 @@
     }
   ],
   "compilerOptions": {
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "lib": ["Es2022","dom"]
   }
 }

@@ -31,7 +31,9 @@ function setActive(key: string) {
 
         <main id="main" class="main">
             <!-- The component will now fill this space -->
-            <component :is="windows[active]" class="component-view" />
+            <suspense class="component-view">
+            <component :is="windows[active]"/>
+            </suspense>
         </main>
 
         <footer class="footer">

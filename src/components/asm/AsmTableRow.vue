@@ -10,7 +10,6 @@ let hoverTimeout :any|null = null;
 let popupData:string = "";
 let popupVisibility:boolean = false;
 const instructionList = await getInstructionList();
-
 function mouseEnter(data:Promise<string>|string,address:number,column:number):void{
     hoverTimeout = setTimeout(async () => {
         console.log("test")
@@ -213,7 +212,7 @@ function printComment(i:PartialInstruction):string|undefined{
 
 <template>
 
-            <tr>
+            <tr :class="'asm-table-col-'+inst.address">
                 <td contenteditable>{{"0x"+inst.address.toString(16)}}</td>
                 <td
                     :id="'asm-table-col-1-'+inst.address"
@@ -265,17 +264,5 @@ td, th {
 tr:nth-child(even) {
     background-color: #dddddd;
 }
-table.floatThead-table {
-    border-top: none;
-    border-bottom: none;
-    background-color: #fff;
-}
 
-th {
-    position: sticky;
-    left:1%;
-    width: 10%;
-    background: white;
-    z-index: 20;
-}
 </style>

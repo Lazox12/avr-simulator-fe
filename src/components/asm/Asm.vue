@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import {PartialInstruction} from '@/structs.ts';
+import {PartialInstruction, RawInstruction} from '@/structs.ts';
 import {ListenerService} from "@/listener_service.ts";
 import AsmTableRow from "@/components/asm/AsmTableRow.vue";
-let instructions:PartialInstruction[] = [];
+import {ref} from "vue";
+let instructions = ref<PartialInstruction[]>();
 ListenerService.instance.subscribe<PartialInstruction[]>("asm-update",(data)=>{
-    instructions = data.payload;
+    console.log(data);
+    instructions.value = data.payload;
 })
 
 function applyChanges(){
 
 }
 function clearTable(){
-    instructions = [];
+    instructions.value = [];
 }
 </script>
 
@@ -82,10 +84,11 @@ td, th {
 }
 
 th {
+    top:0;
     position: sticky;
     left:1%;
     width: 10%;
-    background: white;
+    background: red;
     z-index: 20;
 }
 </style>

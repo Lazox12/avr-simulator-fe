@@ -2,10 +2,9 @@
 
 import HomeProperty from "@/components/home/HomeProperty.vue";
 import {execute} from "@/command_service.ts";
-let mcuValues = await execute<Array<string>>("get_mcu_list");
-if(mcuValues===null){
-    mcuValues = [""]
-}
+let mcuValues= await execute<Array<string>>("get_mcu_list");
+
+
 </script>
 
 <template>

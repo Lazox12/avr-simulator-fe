@@ -103,7 +103,7 @@ function printOperandPopup(operand:Operand):string{
 }
 function printOperandValue(op:Operand):string{
     if (op.operandInfo!=null){
-        console.log(op.operandInfo);
+        console.debug(op.operandInfo);
         return op.operandInfo.registerName
     }
 

@@ -3,11 +3,7 @@ import {PartialInstruction, RawInstruction} from '@/structs.ts';
 import {ListenerService} from "@/listener_service.ts";
 import AsmTableRow from "@/components/asm/AsmTableRow.vue";
 import {ref} from "vue";
-let instructions = ref<PartialInstruction[]>();
-ListenerService.instance.subscribe<PartialInstruction[]>("asm-update",(data)=>{
-    console.log(data);
-    instructions.value = data.payload;
-})
+let instructions = ListenerService.instance.listen<PartialInstruction[]>("asm-update",[])
 
 function applyChanges(){
 

@@ -2,11 +2,12 @@
 
 import {defineComponent} from "vue";
 import {execute} from "@/command_service.ts";
+import {ref,Ref} from "vue";
 
 interface Props{
     caption:string;
     values?:string[]|string;
-    callback?:Function;
+    value?:Ref<string>;
 }
 const props = defineProps<Props>();
 const caption = props.caption;
@@ -22,7 +23,7 @@ const values = function(inp?:string[]|string):string[]{
 
 }(props.values);
 //console.warn(values)
-let selectValue;
+let selectValue = props.value;
 function callback(event:Event):void{
     console.log(event)
     if (event.target ===null){
@@ -36,9 +37,9 @@ function callback(event:Event):void{
 <template>
     <div class="property">
         <h4 style="margin-right: 5px">{{caption}}</h4>
-        <select @change="callback" v-model="selectValue">
+        <select id="select" @change="callback" v-model="selectValue">
             <option @value=""></option>
-            <option v-for="value in values" :key="value" :value="value">{{value}}</option>
+            <option v-for="value in values" :key="value" :value="value" >{{value}}</option>
         </select>
     </div>
 </template>

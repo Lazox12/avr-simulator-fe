@@ -31,3 +31,8 @@ export type OperandInfo = {
     registerMask:string,
     description:string,
 }
+
+export type ProjectState={
+    name: string,
+    mcu:string,
+}

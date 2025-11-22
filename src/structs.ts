@@ -35,4 +35,5 @@ export type OperandInfo = {
 export type ProjectState={
     name: string,
     mcu:string,
+    freq:number,
 }

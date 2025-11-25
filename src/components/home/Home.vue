@@ -4,50 +4,59 @@ import {execute} from "@/command_service.ts";
 import {computed, ref} from "vue";
 import {ProjectState} from "@/structs.ts";
 import {ListenerService} from "@/listener_service.ts";
-let mcuValues= (await execute<Array<string>>("get_mcu_list"))?.sort();
+let mcuValues= (await execute<Array<string>>("get_mcu_list",undefined,true))?.sort();
 let projectData = ListenerService.instance.listen<ProjectState>("project-update",{name:"",mcu:"",freq:0})
-function getFreq(freq:number):{num:number,str:string}{
+function getFreq(freq:number):string {
     if(freq<1000){
-        return {num:freq,str:"hz"}
-    }else if(freq<(10^3)){
-        return {num:freq/(10^3),str:"khz"}
-    }else if(freq<(10^6)){
-        return {num:freq/(10^6),str:"mhz"}
+        return freq.toString()+"Hz"
+    }else if(freq<(10**6)){
+        return (freq/1000).toString()+"KHz"
+    }else {
+        return (freq/(10**6)).toString()+"MHz"
     }
-    return {num:freq,str:"hz"}
 }
-function setFreqNum(freq:number):number{
-
-}
-function setFreqStr(freq:string):number{
+function setFreq(data :string):number|undefined {
+  data= data.toLowerCase();
+  let n ;
+    if(data.search("khz")!=-1){
+      n =parseFloat(data.slice(0,data.length-3))*1000;
+    }else if(data.search("mhz")!=-1){
+      n =parseFloat(data.slice(0,data.length-3))*(10**6);
+    }else if(data.search("hz")!=-1){
+      n =parseFloat(data.slice(0,data.length-2));
+    }else {
+      n=parseFloat(data);
+    }
+  if(isNaN(n)){
+    return undefined;
+  }
+  return n
 
 }
 const mcuModel = computed({
     get: () => projectData.value.mcu,
-    set: (v) => projectData.value.mcu = v
+    set: (v) => {
+      projectData.value.mcu = v
+      callback()
+    }
 });
 const freqModel = computed({
-    get: () => getFreq(projectData.value.freq).num,
-    set: (v) => projectData.value.freq = setFreqNum(v)
-});
-const freqModel1 = computed({
-    get: () => getFreq(projectData.value.freq).str,
-    set: (v) => projectData.value.freq = setFreqStr(v)
+    get: () =>{let f =getFreq(projectData.value.freq); console.log(f); return f},
+    set: (v) => {let d =setFreq(v)
+      console.log(d)
+      if(d!=undefined){
+        projectData.value.freq=d;
+        callback()
+    }}
 });
 
-function callback(key:string) {
-    switch (key){
-        case "mcu":
-            projectData.value.mcu = mcuModel.value;
-            break;
-        case "freq":
-            projectData.value.mcu = mcuModel.value;
-            break;
-        default:
-            throw "Unrecognized key";
-    }
+
+function callback() {
+
     console.log(projectData.value);
-    execute("set_project_data",{project:projectData.value});
+    if(Object.values(projectData.value).every(v => v !== null && v !== undefined)){
+      execute("set_project_data",{project:projectData.value});
+    }
 }
 
 </script>
@@ -56,18 +65,13 @@ function callback(key:string) {
     <div class="home">
         <div class="property">
             <h4 style="margin-right: 5px">mcu:</h4>
-            <select id="mcu" @change="()=>{callback('mcu')}" v-model="mcuModel">
+            <select id="mcu" v-model="mcuModel">
                 <option v-for="value in mcuValues" :key="value" :value="value" >{{value}}</option>
             </select>
         </div>
         <div class="property">
             <h4 style="margin-right: 5px">freq:</h4>
-            <input style="width: 45px" id="freq" @change="()=>{callback('freq')}" v-model="freqModel" type="number">
-            <select id="freq" @change="()=>{callback('freq')}" v-model="freqModel1">
-                <option value="hz">Hz</option>
-                <option value="kHz">KHz</option>
-                <option value="mHz">MHz</option>
-            </select>
+            <input style="width: 80px" id="freq" v-model="freqModel" type="text"/>
         </div>
     </div>
 

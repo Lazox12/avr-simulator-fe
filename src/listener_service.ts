@@ -1,20 +1,22 @@
 import { ref, onMounted, onUnmounted, Ref } from "vue";
 import { listen, Event } from "@tauri-apps/api/event";
 
+const startupListeners:string[] = ["asm-update","project-update"];
+
 export class ListenerService {
     private static _instance: ListenerService;
 
-    // 1. History Buffer: Stores missed events (EventName -> Array of Payloads)
-    private eventBuffer: Map<string, any[]> = new Map();
-    private readonly MAX_BUFFER_SIZE = 50;
+    private eventBuffer: Map<string, any> = new Map();
 
-    // 2. Active Vue Subscribers: (EventName -> Set of update functions)
     private subscribers: Map<string, Set<(payload: any) => void>> = new Map();
 
-    // 3. Registered Tauri Listeners: Tracks if we have told Tauri to listen to this event yet
     private listeners: Set<string> = new Set();
 
-    private constructor() {}
+    private constructor() {
+        startupListeners.forEach(listener => {
+            this.ensureTauriListener(listener);
+        })
+    }
 
     public static get instance(): ListenerService {
         if (!ListenerService._instance) {
@@ -37,13 +39,9 @@ export class ListenerService {
 
         onMounted(() => {
             // 1. Replay History: If data arrived while this component was unloaded
-            const history = this.eventBuffer.get(eventName);
-            if (history && history.length > 0) {
-                console.log(`[SignalService] Replaying history for: ${eventName}`);
-                // Apply the latest relevant history to the Ref
-                // If you want a log of items, you'd handle that differently.
-                // Here we assume the ref represents the "current state".
-                history.forEach((val) => updateRef(val));
+            const data = this.eventBuffer.get(eventName);
+            if(data !== undefined) {
+                updateRef(data);
             }
 
             // 2. Subscribe: Add to the active notification list
@@ -74,13 +72,7 @@ export class ListenerService {
         listen(eventName, (event: Event<any>) => {
             const payload = event.payload;
 
-            // A. Store in Buffer (FIFO)
-            const history = this.eventBuffer.get(eventName) || [];
-            history.push(payload);
-            if (history.length > this.MAX_BUFFER_SIZE) {
-                history.shift();
-            }
-            this.eventBuffer.set(eventName, history);
+            this.eventBuffer.set(eventName, payload);
 
             // B. Notify all active components (Vue Refs)
             const activeListeners = this.subscribers.get(eventName);

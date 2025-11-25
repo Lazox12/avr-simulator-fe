@@ -9,7 +9,7 @@ const {inst} = defineProps<Props>();
 let hoverTimeout :any|null = null;
 let popupData:string = "";
 let popupVisibility:boolean = false;
-const instructionList = await getInstructionList();
+const instructionList = await execute<RawInstruction[]>("get_instruction_list",undefined,true);
 function mouseEnter(data:Promise<string>|string,address:number,column:number):void{
     hoverTimeout = setTimeout(async () => {
         console.log("test")
@@ -47,22 +47,7 @@ async function printInstructionPopup(opcode_id:number):Promise<string>{
     return `description: ${i.description}<br>action: ${i.action}`;
 
 }
-async function getInstructionList(): Promise<RawInstruction[]>{
-    let x= localStorage.getItem("instruction-list");
-    let i:RawInstruction[];
-    if (x ===null){
-        let a = await execute<RawInstruction[]>("get_instruction_list")
-        if(a!==null){
-            localStorage.setItem("instruction-list",JSON.stringify(a));
-            i = a;
-        }
-        i = [];
-    }else{
-        i = JSON.parse(x)
-    }
 
-    return i;
-}
 function getInstruction(opcode_id:number){
     let res = instructionList.at(opcode_id);
     if(res!==undefined){

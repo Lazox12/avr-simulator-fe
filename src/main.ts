@@ -1,5 +1,7 @@
-
-import { createApp } from 'vue'
-
 import App from './App.vue'
-createApp(App).mount('#app')
+import { createApp } from 'vue'
+import {initMenu} from "@/menu.ts";
+
+createApp(App).mount('#app').$nextTick(() => {
+    initMenu()
+})

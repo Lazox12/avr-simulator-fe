@@ -7,8 +7,7 @@ interface Props{
 }
 const {inst} = defineProps<Props>();
 let hoverTimeout :any|null = null;
-let popupData:string = "";
-let popupVisibility:boolean = false;
+
 const instructionList = await execute<RawInstruction[]>("get_instruction_list",undefined,true);
 function mouseEnter(data:Promise<string>|string,address:number,column:number):void{
     hoverTimeout = setTimeout(async () => {
@@ -16,14 +15,14 @@ function mouseEnter(data:Promise<string>|string,address:number,column:number):vo
         if(typeof data !== "string"){
             data = await data;
         }
-        popupData = data;
-        popupVisibility = true;
         let f = document.getElementById("asm-table-col-"+column+"-"+address);
         let pop = document.getElementById("asm-popup");
         if(f===null || pop===null){
             console.error(data,address,column);
             return;
         }
+        pop.innerHTML=data
+        pop.style.visibility="visible";
         let rect = f.getBoundingClientRect();
         console.log(rect);
         pop.style.top = (rect.top+rect.height) + "px";
@@ -39,12 +38,12 @@ function mouseLeave(){
     if (pop === null) {
         return;
     }
-    popupVisibility = false;
-    popupData = "";
+  pop.style.visibility="hidden";
+    pop.innerHTML =""
 }
 async function printInstructionPopup(opcode_id:number):Promise<string>{
     let i = await getInstruction(opcode_id);
-    return `description: ${i.description}<br>action: ${i.action}`;
+    return `<p style="display: flex"">Description: ${i.description}<br> Action: ${i.action}</p>`;
 
 }
 
@@ -207,24 +206,24 @@ function printComment(i:PartialInstruction):string|undefined{
                     {{ (getInstruction(inst.opcodeId)).name }}
                 </td>
                 <template v-for="(op,index) of renderOperand(inst.operands)" :key="index">
-                <td
-                    v-if="op.constraint=='-1'"
-                    :id="'asm-table-col-'+(index+2)+'-'+inst.address">
-                </td>
-                <td
-                    v-else-if="op.operandInfo===null"
-                    :id="'asm-table-col-'+(index+2)+'-'+inst.address"
-                    contenteditable>
-                    {{printOperandValue(op)}}
-                </td>
-                <td
-                    v-else
-                    :id="'asm-table-col-'+(index+2)+'-'+inst.address"
-                    @mouseenter="mouseEnter(printOperandPopup(op),inst.address,index+2)"
-                    @mouseleave="mouseLeave()"
-                    contenteditable>
-                    {{printOperandValue(op)}}
-                </td>
+                    <td
+                        v-if="op.constraint=='-1'"
+                        :id="'asm-table-col-'+(index+2)+'-'+inst.address">
+                    </td>
+                    <td
+                        v-else-if="op.operandInfo===null"
+                        :id="'asm-table-col-'+(index+2)+'-'+inst.address"
+                        contenteditable>
+                        {{printOperandValue(op)}}
+                    </td>
+                    <td
+                        v-else
+                        :id="'asm-table-col-'+(index+2)+'-'+inst.address"
+                        @mouseenter="mouseEnter(printOperandPopup(op),inst.address,index+2)"
+                        @mouseleave="mouseLeave()"
+                        contenteditable>
+                        {{printOperandValue(op)}}
+                    </td>
                 </template>
                 <td
                     :id="'asm-table-col-4-'+inst.address"
@@ -232,7 +231,6 @@ function printComment(i:PartialInstruction):string|undefined{
                     {{printComment(inst)}}
                 </td>
             </tr>
-            <asm-table-popup :visibility="popupVisibility" :data="popupData"/>
 
 
 </template>

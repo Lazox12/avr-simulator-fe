@@ -33,6 +33,8 @@ function clearTable(){
                 />
             </tbody>
         </table>
+        <div id="asm-popup" class="popup">
+        </div>
         <div style="height: 80px">
 
         </div>
@@ -86,5 +88,22 @@ th {
     width: 10%;
     background: red;
     z-index: 20;
+}
+.popup{
+  background-color: lightgray;
+  border: 3px solid gray;
+  border-radius: 5px;
+  z-index: 100;
+  position:fixed;
+  top: 30px;
+  visibility: hidden;
+}
+#asm-popup h4,
+#asm-popup p {
+  display: inline;
+  vertical-align: top;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  line-height: 28px;
 }
 </style>

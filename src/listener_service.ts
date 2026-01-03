@@ -33,7 +33,7 @@ export class ListenerService {
         this.ensureTauriListener(eventName);
 
         const updateRef = (payload: T) => {
-            console.log(payload);
+            console.log("[SignalService]:"+eventName+" recieved payload:"+payload);
             data.value = payload;
         };
 

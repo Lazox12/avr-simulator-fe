@@ -15,5 +15,6 @@ export async function execute<T>(command: string, args?: InvokeArgs,cache:boolea
         return await invoke<T>(command, args);
     } catch (err) {
         console.error(err);
+        throw err;
     }
 }

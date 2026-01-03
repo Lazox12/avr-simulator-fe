@@ -3,6 +3,7 @@ import Home from "@/components/home/Home.vue";
 import Asm from "@/components/asm/Asm.vue";
 import Sim from "@/components/Sim.vue";
 import { ref } from "vue";
+import {execute} from "@/command_service.ts";
 
 // Use 'any' or Component type if available
 const windows: Record<string, any> = { "Home": Home, "Assembly": Asm, "sim": Sim };
@@ -11,6 +12,21 @@ const active = ref("Home");
 function setActive(key: string) {
     active.value = key;
 }
+let isRunning = false;
+async function onPauseClick() {
+    let d = document.getElementById("button-pause-i");
+
+    if (isRunning) {
+        await execute<null>("sim_action", {action: "run"});
+        d?.classList.remove("fa-pause");
+        d?.classList.add("fa-play");
+    }else{
+        await execute<null>("sim_action", {action: "pause"});
+        d?.classList.remove("fa-play");
+        d?.classList.add("fa-pause");
+    }
+}
+async function onResumeClick() {}
 </script>
 
 <template>
@@ -26,6 +42,11 @@ function setActive(key: string) {
                 >
                     {{ key }}
                 </button>
+            </div>
+            <div class="control-buttons">
+                <button id="button-pause" class="button button-control" @click="onPauseClick" title="run/pause the debuger"><i id="button-pause-i" class="fa fa-pause"/></button>
+                <button id="button-next" class="button button-control" @click="onNextClick" title="next instruction"><i class="fa fa-arrow-circle-down" /></button>
+                <button id="button-over" class="button button-control" title="skip entire function (only on call)"><i class="fa fa-fast-forward"/></button>
             </div>
         </header>
 
@@ -60,6 +81,11 @@ function setActive(key: string) {
     height: 50px; /* Fixed height for stability */
     align-items: center; /* Vertically center buttons */
     flex-shrink: 0; /* Prevent header from shrinking */
+}
+.control-buttons{
+    margin-left:auto;
+    gap: 15px;
+    display: flex
 }
 
 /* This is the magic part: flex: 1 makes it fill all remaining space */
@@ -99,6 +125,8 @@ function setActive(key: string) {
 
 .button.active {
     background: #42b883;
-    font-weight: bold;
+}
+.button-control:active{
+    background: #42b883;
 }
 </style>

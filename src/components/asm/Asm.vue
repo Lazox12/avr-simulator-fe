@@ -214,7 +214,7 @@ watch(breakpoints,(b_new,b_old)=>{
             console.error("invalid elem id with param",b_new[i])
             return;
         }
-        d.style.backgroundColor="Red";
+        d.style.backgroundColor="rgba(255,0,0,0.3)";
     }
 })
 
@@ -269,7 +269,9 @@ watch(breakpoints,(b_new,b_old)=>{
 
 .line {
     display: block; /* Forces new line */
+    border-radius: 5px;
     line-height: 1.5;
+    width: 80%;
 }
 
 /* The magic part: generating numbers */

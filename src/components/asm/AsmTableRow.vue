@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {Operand, PartialInstruction, RawInstruction} from "@/structs.ts";
 import {execute} from "@/command_service.ts";
-import AsmTablePopup from "@/components/asm/AsmTablePopup.vue";
 interface Props{
     inst:PartialInstruction;
 }
@@ -170,6 +169,14 @@ function printOperandValue(op:Operand):string{
         case "o":{
             return String(op.value);
         }
+        case "c":{
+            if (op.value==1){
+              return String("+");
+            }
+            if (op.value==1){
+              return String("-");
+            }
+      }
         default:{
             return 'error invild constraint:'+op.constraint;
         }

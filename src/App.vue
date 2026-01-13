@@ -2,20 +2,22 @@
 import Home from "@/components/home/Home.vue";
 import Asm from "@/components/asm/Asm.vue";
 import Sim from "@/components/Sim.vue";
-import { ref } from "vue";
+import { ref,watch } from "vue";
 import {execute} from "@/command_service.ts";
+import {ListenerService} from "@/listener_service.ts";
 
 // Use 'any' or Component type if available
 const windows: Record<string, any> = { "Home": Home, "Assembly": Asm, "sim": Sim };
 const active = ref("Home");
+let sim_status = ListenerService.instance.listen<string>("sim-status","")
 
 function setActive(key: string) {
     active.value = key;
 }
-let isRunning = false;
+let isRunning = ref(false);
 async function onPauseClick() {
     let d = document.getElementById("button-pause-i");
-
+    isRunning.value = !isRunning.value;
     if (isRunning) {
         await execute<null>("sim_action", {action: "run"});
         d?.classList.remove("fa-pause");
@@ -26,14 +28,28 @@ async function onPauseClick() {
         d?.classList.add("fa-pause");
     }
 }
-async function onResumeClick() {}
+
+watch(sim_status, (newStatus) => {
+    // If the service reports "Pause", force state to false
+    if (newStatus === "Pause") {
+        isRunning.value = false;
+    }
+    // Optional: If the service reports "Run", you might want to set it to true
+    if (newStatus === "Run") {
+        isRunning.value = true;
+    }
+});
+async function onNextClick() {
+    await execute<null>("sim_action", {action: "next"});
+}
+async function onSkipClick() {
+    await execute<null>("sim_action", {action: "skip"});
+}
 </script>
 
 <template>
-    <!-- Wrap everything in a main layout container -->
     <div class="app-layout">
         <header class="header">
-            <!-- Added :key to v-for to prevent Vue warnings -->
             <div v-for="(_, key) in windows" :key="key">
                 <button
                     class="button"
@@ -46,7 +62,7 @@ async function onResumeClick() {}
             <div class="control-buttons">
                 <button id="button-pause" class="button button-control" @click="onPauseClick" title="run/pause the debuger"><i id="button-pause-i" class="fa fa-pause"/></button>
                 <button id="button-next" class="button button-control" @click="onNextClick" title="next instruction"><i class="fa fa-arrow-circle-down" /></button>
-                <button id="button-over" class="button button-control" title="skip entire function (only on call)"><i class="fa fa-fast-forward"/></button>
+                <button id="button-over" class="button button-control" @click="onSkipClick" title="skip entire function (only on call)"><i class="fa fa-fast-forward"/></button>
             </div>
         </header>
 

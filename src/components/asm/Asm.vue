@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import {Operand, PartialInstruction, RawInstruction} from '@/structs.ts';
 import {ListenerService} from "@/listener_service.ts";
-import AsmTableRow from "@/components/asm/AsmTableRow.vue";
-import {ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
 import {execute} from "@/command_service.ts";
 let instructions = ListenerService.instance.listen<PartialInstruction[]>("asm-update",[])
 let breakpoints = ListenerService.instance.listen<number[]>("breakpoints-update",[])
+let simLocation = ListenerService.instance.listen<number>("sim-location", 0)
 const instructionList = await execute<RawInstruction[]>("get_instruction_list",undefined,true);
-let hoverTimeout :any|null = null;
-function applyChanges(){
 
-}
+const breakpointSet = computed(() => new Set(breakpoints.value));
+
+let hoverTimeout :any|null = null;
+
+function applyChanges(){}
+
 function clearTable(){
     instructions.value = [];
 }
+
 function getInstruction(opcode_id:number){
     if(instructionList ===undefined){
         return;
@@ -36,6 +40,7 @@ function getInstruction(opcode_id:number){
         }
     }
 }
+
 function printOperandValue(op:Operand|undefined):string{
     if(op===undefined){
         return ""
@@ -137,6 +142,7 @@ function printOperandValue(op:Operand|undefined):string{
         }
     }
 }
+
 function printInstruction(instruction: PartialInstruction):string{
     let toReturn = "";
     toReturn+=getInstruction(instruction.opcodeId).name
@@ -152,6 +158,7 @@ function printInstruction(instruction: PartialInstruction):string{
     toReturn+="\n"
     return toReturn
 }
+
 function mouseEnter(data:Promise<string>|string,address:number):void{
     hoverTimeout = setTimeout(async () => {
         //console.log("test")
@@ -172,6 +179,7 @@ function mouseEnter(data:Promise<string>|string,address:number):void{
         pop.style.left = (rect.left+50) + "px";
     }, 1500)
 }
+
 function mouseLeave(){
     if (hoverTimeout === null) {
         return;
@@ -184,52 +192,47 @@ function mouseLeave(){
     pop.style.visibility="hidden";
     pop.innerHTML =""
 }
+
 async function printInstructionPopup(opcode_id:number):Promise<string>{
     let i = await getInstruction(opcode_id);
     return `<p style="display: flex"">Description: ${i.description}<br> Action: ${i.action}</p>`;
 
 }
+
 function handleLineClick(event:MouseEvent,address:number):void{
-    const x = event.clientX
-
-    if (x > 50) {
-        return
-    }
     execute("sim_action", {action:{break:address}});
-
 }
-watch(breakpoints,(b_new,b_old)=>{
-    console.log(b_old,b_new);
-    for(let i in b_old){
-        let d = document.getElementById("asm-table-col-"+b_old[i])
-        if (d ===null){
-            console.error("invalid elem id with param",b_old[i])
-            return;
-        }
-        d.style.backgroundColor="";
-    }
-    for(let i in b_new){
-        let d = document.getElementById("asm-table-col-"+b_new[i])
-        if (d ===null){
-            console.error("invalid elem id with param",b_new[i])
-            return;
-        }
-        d.style.backgroundColor="rgba(255,0,0,0.3)";
-    }
-})
+
 
 </script>
 
 <template>
     <div class="code-container">
-        <span class="line"
-              :id = "'asm-table-col-'+i.address"
-              :data-num=i.address.toString(16)
-              @mouseenter="mouseEnter(printInstructionPopup(i.opcodeId), i.address)"
-              @mouseleave="mouseLeave()"
-              @click="handleLineClick($event, i.address)"
-              v-for="i in instructions">{{printInstruction(i)}}
-        </span>
+        <div class="line"
+             v-for="i in instructions"
+             :style="{ backgroundColor: breakpointSet.has(i.address) ? 'rgba(255,0,0,0.3)' : ''}"
+        >
+            <div class="line-ptr"
+                 @click="handleLineClick($event, i.address)"
+            >
+                <i v-if="simLocation==i.address" class="fa fa-arrow-right"/>
+            </div>
+
+            <div class="line-number"
+                 @click="handleLineClick($event, i.address)"
+            >
+                <span>{{i.address.toString(16)}}</span>
+            </div>
+
+            <span class="line-text"
+                  :id = "'asm-table-col-'+i.address"
+                  @mouseenter="mouseEnter(printInstructionPopup(i.opcodeId), i.address)"
+                  @mouseleave="mouseLeave()"
+
+            >
+                {{printInstruction(i)}}
+            </span>
+        </div>
 
     </div>
     <div id="asm-popup" class="popup">
@@ -268,29 +271,18 @@ watch(breakpoints,(b_new,b_old)=>{
 }
 
 .line {
-    display: block; /* Forces new line */
+    display: flex; /* Forces new line */
     border-radius: 5px;
     line-height: 1.5;
     width: 80%;
 }
-
-/* The magic part: generating numbers */
-.line::before {
-    counter-increment: line-number;
-    content: attr(data-num);
-
-    /* Styling the number */
-    display: inline-block;
+.line-ptr {
+    width: 20px;
+}
+.line-number{
     width: 30px;
-    margin-right: 15px;
-    color: #666;
-    text-align: right;
-    border-right: 1px solid #555;
-    padding-right: 5px;
-
-    /* Crucial: Prevent user from selecting/copying the line numbers */
-    -webkit-user-select: none;
-    user-select: none;
+    border-right:solid 1px gray;
+    margin-right: 5px;
 }
 .popup{
   background-color: lightgray;

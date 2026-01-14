@@ -18,7 +18,7 @@ let isRunning = ref(false);
 async function onPauseClick() {
     let d = document.getElementById("button-pause-i");
     isRunning.value = !isRunning.value;
-    if (isRunning) {
+    if (isRunning.value) {
         await execute<null>("sim_action", {action: "run"});
         d?.classList.remove("fa-pause");
         d?.classList.add("fa-play");
@@ -30,12 +30,10 @@ async function onPauseClick() {
 }
 
 watch(sim_status, (newStatus) => {
-    // If the service reports "Pause", force state to false
-    if (newStatus === "Pause") {
+    if (newStatus === "pause") {
         isRunning.value = false;
     }
-    // Optional: If the service reports "Run", you might want to set it to true
-    if (newStatus === "Run") {
+    if (newStatus === "run") {
         isRunning.value = true;
     }
 });

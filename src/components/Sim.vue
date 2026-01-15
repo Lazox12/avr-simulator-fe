@@ -2,14 +2,14 @@
 
 import {ListenerService} from "@/listener_service.ts";
 import {computed, ref, watch} from "vue";
+import {execute} from "@/command_service.ts";
 
 let registers = ListenerService.instance.listen<number[]>("sim-register-status",[0])
+let watchedRegisters = ListenerService.instance.listen<Map<string,number>>("sim-watch-list-update",new Map())
 const selectedFormat = ref("hex");
+const input= ref("");
 
 const formattedRegisters = computed(() => {
-    // Safety check: if registers hasn't loaded yet, return empty
-    if (!registers.value) return [];
-
     return registers.value.map((val) => {
         if (selectedFormat.value === 'hex') {
             return val.toString(16).toUpperCase().padStart(2, '0');
@@ -20,13 +20,43 @@ const formattedRegisters = computed(() => {
         }
     });
 });
+const formatedWatchedRegisters = computed(() => {
+    let toRet = new Map();
+    watchedRegisters.value.forEach((val,key) => {
+        if (selectedFormat.value === 'hex') {
+            toRet.set(key,val.toString(16).toUpperCase().padStart(2, '0'));
+        } else if (selectedFormat.value === 'bin') {
+            toRet.set(key,val.toString(2).padStart(8, '0'));
+        } else {
+            toRet.set(key,val.toString(10));
+        }
+    });
+    return toRet;
+});
 
+function stringToNumber(str: string): number {
+    let result = 0; // Initialize as BigInt
+
+    for (let i = 0; i < str.length; i++) {
+        // Shift existing bits left by 8 to make room
+        result = result << 8;
+        // Add the current character's code
+        result = result + str.charCodeAt(i);
+    }
+
+    return result;
+}
+
+function watchListUpdate() {
+    console.log(stringToNumber(input.value))
+    execute("sim_action", {action:{watch:stringToNumber(input.value)}});
+}
 </script>
 
 <template>
     <div class="body">
         <div class="format-select">
-            <h4 style="width: 125px">display format:</h4>
+            <h4 style="margin-left: auto">display format:</h4>
             <select v-model="selectedFormat" style = "width:60px;height:40px">
                 <option selected value="hex">hex</option>
                 <option value="dec">dec</option>
@@ -34,6 +64,7 @@ const formattedRegisters = computed(() => {
 
             </select>
         </div>
+        <br>
         <div class="register-grid">
             <div
                 class="register-cell"
@@ -45,10 +76,27 @@ const formattedRegisters = computed(() => {
             </div>
         </div>
     </div>
+
     <div class="watchlist">
         <h4>enter regiter to watch:</h4>
-        <input class="watchlist-input" style="height:30px">
+        <input class="watchlist-input" style="height:30px" v-model="input">
+        <button @click="watchListUpdate()">watch</button>
     </div>
+    <table>
+        <thead>
+            <tr>
+                <th>variable</th>
+                <th>value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="(value,key) in formatedWatchedRegisters">
+                <th>{{key}}</th>
+                <td>{{value}}</td>
+
+            </tr>
+        </tbody>
+    </table>
 
 </template>
 
@@ -59,10 +107,10 @@ const formattedRegisters = computed(() => {
 }
 
 .format-select {
-    margin-left:auto;
     display: flex;
     max-height: 60px;
     align-items: center;
+    width: 100%;
 }
 .register-grid {
     display: flex;

@@ -1,7 +1,7 @@
 import { ref, onMounted, onUnmounted, Ref } from "vue";
 import { listen, Event } from "@tauri-apps/api/event";
 
-const startupListeners:string[] = ["asm-update","project-update"];
+const startupListeners:string[] = ["asm-update","project-update","sim-register-status",""];
 
 export class ListenerService {
     private static _instance: ListenerService;
@@ -33,7 +33,10 @@ export class ListenerService {
         this.ensureTauriListener(eventName);
 
         const updateRef = (payload: T) => {
-            console.log("[SignalService]:"+eventName+" recieved payload:"+payload);
+            console.log("[SignalService]:"+eventName+" recieved payload:"+payload+ "of type:"+typeof payload);
+            if (typeof payload === "object"){
+                console.log(JSON.stringify(payload, null, 2))
+            }
             data.value = payload;
         };
 

@@ -22,7 +22,8 @@ const formattedRegisters = computed(() => {
 });
 const formatedWatchedRegisters = computed(() => {
     let toRet = new Map();
-    watchedRegisters.value.forEach((val,key) => {
+    for (let [key,val] of Object.entries(watchedRegisters.value)) {
+
         if (selectedFormat.value === 'hex') {
             toRet.set(key,val.toString(16).toUpperCase().padStart(2, '0'));
         } else if (selectedFormat.value === 'bin') {
@@ -30,20 +31,20 @@ const formatedWatchedRegisters = computed(() => {
         } else {
             toRet.set(key,val.toString(10));
         }
-    });
+    }
+    console.log(toRet);
     return toRet;
 });
 
-function stringToNumber(str: string): number {
-    let result = 0; // Initialize as BigInt
+function stringToNumber(str: string): number[] {
+    let result:number[] = [0,0,0,0,0,0,0,0];
 
     for (let i = 0; i < str.length; i++) {
         // Shift existing bits left by 8 to make room
-        result = result << 8;
-        // Add the current character's code
-        result = result + str.charCodeAt(i);
-    }
 
+        // Add the current character's code
+        result[i]=str.charCodeAt(i);
+    }
     return result;
 }
 
@@ -82,7 +83,7 @@ function watchListUpdate() {
         <input class="watchlist-input" style="height:30px" v-model="input">
         <button @click="watchListUpdate()">watch</button>
     </div>
-    <table>
+    <table class="watch-table">
         <thead>
             <tr>
                 <th>variable</th>
@@ -90,9 +91,9 @@ function watchListUpdate() {
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(value,key) in formatedWatchedRegisters">
-                <th>{{key}}</th>
-                <td>{{value}}</td>
+            <tr v-for="(value) in formatedWatchedRegisters">
+                <th>{{value[0]}}</th>
+                <td>{{value[1]}}</td>
 
             </tr>
         </tbody>
@@ -132,6 +133,44 @@ function watchListUpdate() {
 .watchlist {
     display: flex;
     align-items: center;
+}
+.watch-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: sans-serif;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.watch-table thead tr {
+    background-color: #009879; /* Adjust to your brand color */
+    color: #ffffff;
+    text-align: left;
+}
+
+.watch-table th,
+.watch-table td {
+    padding: 12px 15px;
+    border: 1px solid #dddddd;
+}
+
+.watch-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+/* Zebra striping for better readability */
+.watch-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.watch-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+/* Make the variable name column slightly bold/distinct */
+.watch-table tbody th {
+    font-weight: 600;
+    color: #333;
+    background-color: #fafafa;
 }
 
 </style>

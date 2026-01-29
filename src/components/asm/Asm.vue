@@ -162,7 +162,7 @@ function printComment(i:PartialInstruction):string|undefined{
 
 function printInstruction(instruction: PartialInstruction):string{
     let toReturn = "";
-    toReturn+=getInstruction(instruction.opcodeId).name
+    toReturn+=getInstruction(instruction.opcodeId)?.name
     toReturn+=" "
     if (instruction.operands!==null){
         for (let op of instruction.operands){
@@ -216,7 +216,7 @@ function mouseLeave(){
 
 async function printInstructionPopup(opcode_id:number):Promise<string>{
     let i = await getInstruction(opcode_id);
-    return `<p style="display: flex"">Description: ${i.description}<br> Action: ${i.action}</p>`;
+    return `<p style="display: flex"">Description: ${i?.description}<br> Action: ${i?.action}</p>`;
 
 }
 

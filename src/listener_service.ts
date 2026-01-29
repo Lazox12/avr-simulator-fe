@@ -33,7 +33,7 @@ export class ListenerService {
         this.ensureTauriListener(eventName);
 
         const updateRef = (payload: T) => {
-            console.log("[SignalService]:"+eventName+" recieved payload:"+payload+ "of type:"+typeof payload);
+            console.log("[SignalService]:"+eventName+" recieved payload:"+payload+ "   of type:"+typeof payload);
             if (typeof payload === "object"){
                 console.log(JSON.stringify(payload, null, 2))
             }

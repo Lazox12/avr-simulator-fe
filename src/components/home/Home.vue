@@ -6,6 +6,7 @@ import {ProjectState} from "@/structs.ts";
 import {ListenerService} from "@/listener_service.ts";
 let mcuValues= (await execute<Array<string>>("get_mcu_list",undefined,true))?.sort();
 let projectData = ListenerService.instance.listen<ProjectState>("project-update",{name:"",mcu:"",freq:0})
+
 function getFreq(freq:number):string {
     if(freq<1000){
         return freq.toString()+"Hz"
@@ -50,6 +51,12 @@ const freqModel = computed({
     }}
 });
 
+const updateModel = computed({
+    get: () =>{return false},
+    set: (v) => {
+        execute<null>("sim_action", {action: {watchUpdate:v}})
+    }
+});
 
 function callback() {
 
@@ -72,6 +79,10 @@ function callback() {
         <div class="property">
             <h4 style="margin-right: 5px">freq:</h4>
             <input style="width: 80px" id="freq" v-model="freqModel" type="text"/>
+        </div>
+        <div class="property">
+            <h4 style="margin-right: 5px">auto update values:</h4>
+            <input type="checkbox" id="freq" v-model="updateModel"/>
         </div>
     </div>
 

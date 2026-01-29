@@ -142,19 +142,40 @@ function printOperandValue(op:Operand|undefined):string{
         }
     }
 }
+function printComment(i:PartialInstruction):string|undefined{
+    switch (i.commentDisplay) {
+        case "None":
+            return "";
+        case "Bin":
+            return "\t//0b"+parseInt(i.comment).toString(2);
+        case "Dec":
+            return "\t//"+parseInt(i.comment).toString(10);
+        case "Oct":
+            return "\t//0c"+parseInt(i.comment).toString(8);
+        case "Hex":
+            return "\t//0x"+parseInt(i.comment).toString(16);
+        case "String":
+            return "    //"+i.comment;
+    }
+    return undefined;
+}
 
 function printInstruction(instruction: PartialInstruction):string{
     let toReturn = "";
     toReturn+=getInstruction(instruction.opcodeId).name
     toReturn+=" "
-    if (instruction.operands===null){
-        return toReturn;
+    if (instruction.operands!==null){
+        for (let op of instruction.operands){
+            if(op.operandInfo!=null){
+                toReturn+=op.operandInfo.registerName;
+            }else{
+                toReturn +=printOperandValue(op);
+            }
+            toReturn+=","
+        }
+        toReturn =toReturn.substring(0, toReturn.length - 1); // remove last ,
     }
-    for (let op in instruction.operands){
-        toReturn +=printOperandValue(instruction.operands[op]);
-        toReturn+=","
-    }
-    toReturn =toReturn.substring(0, toReturn.length - 1);
+    toReturn+= printComment(instruction);
     toReturn+="\n"
     return toReturn
 }
@@ -237,8 +258,8 @@ function handleLineClick(event:MouseEvent,address:number):void{
     </div>
     <div id="asm-popup" class="popup">
     </div>
-    <button class = "applyButton" @click="applyChanges()" id="asm-apply-changes-button" disabled> apply changes</button>
-    <button class = "clearButton" @click="clearTable()" id="asm-clear-button"> clear table</button>
+    <<!--<button class = "applyButton" @click="applyChanges()" id="asm-apply-changes-button" disabled> apply changes</button>
+    <button class = "clearButton" @click="clearTable()" id="asm-clear-button"> clear table</button>-->
 </template>
 
 <style scoped>
@@ -283,6 +304,10 @@ function handleLineClick(event:MouseEvent,address:number):void{
     width: 30px;
     border-right:solid 1px gray;
     margin-right: 5px;
+}
+.line-text{
+    white-space: pre-wrap;
+    tab-size: 4;
 }
 .popup{
   background-color: lightgray;

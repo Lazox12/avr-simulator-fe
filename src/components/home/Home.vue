@@ -37,8 +37,8 @@ function setFreq(data :string):number|undefined {
 const mcuModel = computed({
     get: () => projectData.value.mcu,
     set: (v) => {
-      projectData.value.mcu = v
-      callback()
+        projectData.value.mcu = v
+        execute("set_mcu", {mcu:v});
     }
 });
 const freqModel = computed({
@@ -47,7 +47,7 @@ const freqModel = computed({
       console.log(d)
       if(d!=undefined){
         projectData.value.freq=d;
-        callback()
+        execute("set_freq", {freq:d});
     }}
 });
 

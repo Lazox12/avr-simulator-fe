@@ -1,4 +1,5 @@
 import {invoke,InvokeArgs} from '@tauri-apps/api/core'
+import {message} from "@tauri-apps/plugin-dialog";
 
 export async function execute<T>(command: string, args?: InvokeArgs,cache:boolean = false): Promise<T|undefined> {
     if (cache) {
@@ -15,6 +16,7 @@ export async function execute<T>(command: string, args?: InvokeArgs,cache:boolea
         return await invoke<T>(command, args);
     } catch (err) {
         console.error(err);
+        message(err as string,{title:"error:",kind:"error"});
         throw err;
     }
 }

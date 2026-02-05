@@ -6,7 +6,7 @@ import {ProjectState} from "@/structs.ts";
 import {ListenerService} from "@/listener_service.ts";
 let mcuValues= (await execute<Array<string>>("get_mcu_list",undefined,true))?.sort();
 let projectData = ListenerService.instance.listen<ProjectState>("project-update",{name:"",mcu:"",freq:0})
-
+let update_val = ListenerService.instance.listen<boolean>("auto_update_status",false);
 function getFreq(freq:number):string {
     if(freq<1000){
         return freq.toString()+"Hz"
@@ -52,19 +52,12 @@ const freqModel = computed({
 });
 
 const updateModel = computed({
-    get: () =>{return false},
-    set: (v) => {
+    get: () =>{update_val.value},
+    set: (v:boolean) => {
+        update_val.value = v;
         execute<null>("sim_action", {action: {watchUpdate:v}})
     }
 });
-
-function callback() {
-
-    console.log(projectData.value);
-    if(Object.values(projectData.value).every(v => v !== null && v !== undefined)){
-      execute("set_project_data",{project:projectData.value});
-    }
-}
 
 </script>
 

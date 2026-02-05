@@ -2,18 +2,24 @@
 import Home from "@/components/home/Home.vue";
 import Asm from "@/components/asm/Asm.vue";
 import Sim from "@/components/Sim.vue";
-import { ref,watch } from "vue";
+import {computed, ref, watch} from "vue";
 import {execute} from "@/command_service.ts";
 import {ListenerService} from "@/listener_service.ts";
+import {message} from "@tauri-apps/plugin-dialog";
 
 // Use 'any' or Component type if available
 const windows: Record<string, any> = { "Home": Home, "Assembly": Asm, "sim": Sim };
 const active = ref("Home");
 let sim_status = ListenerService.instance.listen<string>("sim-status","")
+let error = ListenerService.instance.listen<string>("error","")
+let sim_state = ListenerService.instance.listen<string>("sim_state", "No Data")
 
 function setActive(key: string) {
     active.value = key;
 }
+watch(error,(value) => {
+    message(value as string,{title:"error:",kind:"error"});
+})
 let isRunning = ref(false);
 async function onPauseClick() {
     let d = document.getElementById("button-pause-i");
@@ -58,6 +64,7 @@ async function onSkipClick() {
                 </button>
             </div>
             <div class="control-buttons">
+                <p style="margin: auto 0 auto 0">Sim status:{{sim_state}}</p>
                 <button id="button-pause" class="button button-control" @click="onPauseClick" title="run/pause the debuger"><i id="button-pause-i" class="fa fa-pause"/></button>
                 <button id="button-next" class="button button-control" @click="onNextClick" title="next instruction"><i class="fa fa-arrow-circle-down" /></button>
                 <button id="button-over" class="button button-control" @click="onSkipClick" title="skip entire function (only on call)"><i class="fa fa-fast-forward"/></button>

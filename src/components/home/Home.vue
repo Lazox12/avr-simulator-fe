@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { execute } from "@/command_service.ts";
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue"; // Add onMounted
 import { ProjectState } from "@/structs.ts";
 import { ListenerService } from "@/listener_service.ts";
 
-let mcuValues = (await execute<Array<string>>("get_mcu_list", undefined, true))?.sort();
+const mcuValues = ref<string[]>([]);
 let projectData = ListenerService.instance.listen<ProjectState>("project-update", { name: "", mcu: "", freq: 0 });
 let autoUpdateStatus = ListenerService.instance.listen<boolean>("auto_update_status", false);
+
+onMounted(async () => {
+    const values = await execute<Array<string>>("get_mcu_list", undefined, true);
+    if (values) {
+        mcuValues.value = values.sort();
+    }
+});
 
 function getFreq(freq: number): string {
     if (freq < 1000) {

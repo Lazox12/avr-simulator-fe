@@ -1,16 +1,24 @@
 <script setup lang="ts">
 import {Operand, PartialInstruction, RawInstruction} from '@/structs.ts';
 import {ListenerService} from "@/listener_service.ts";
-import {computed, ref, watch} from "vue";
+import {computed, ref, watch, onMounted} from "vue"; // Add onMounted
 import {execute} from "@/command_service.ts";
+
 let instructions = ListenerService.instance.listen<PartialInstruction[]>("asm-update",[])
 let breakpoints = ListenerService.instance.listen<number[]>("breakpoints-update",[])
 let simLocation = ListenerService.instance.listen<number>("sim-location", 0)
-const instructionList = await execute<RawInstruction[]>("get_instruction_list",undefined,true);
+
+const instructionList = ref<RawInstruction[]>([]);
 
 const breakpointSet = computed(() => new Set(breakpoints.value));
-
 let hoverTimeout :any|null = null;
+
+onMounted(async () => {
+    const list = await execute<RawInstruction[]>("get_instruction_list",undefined,true);
+    if(list) {
+        instructionList.value = list;
+    }
+});
 
 function applyChanges(){}
 
@@ -19,10 +27,10 @@ function clearTable(){
 }
 
 function getInstruction(opcode_id:number){
-    if(instructionList ===undefined){
+    if(instructionList.value.length === 0){
         return;
     }
-    let res = instructionList.at(opcode_id);
+    let res = instructionList.value.at(opcode_id);
     if(res!==undefined){
         return res;
     }
@@ -36,7 +44,6 @@ function getInstruction(opcode_id:number){
             len: -1,
             name: ".word",
             opcode: ".word"
-
         }
     }
 }

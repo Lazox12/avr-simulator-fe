@@ -235,38 +235,40 @@ function handleLineClick(event:MouseEvent,address:number):void{
 </script>
 
 <template>
-    <div class="code-container">
-        <div class="line"
-             v-for="i in instructions"
-             :style="{ backgroundColor: breakpointSet.has(i.address) ? 'rgba(255,0,0,0.3)' : ''}"
-        >
-            <div class="line-ptr"
-                 @click="handleLineClick($event, i.address)"
+    <div><!-- wrapper -->
+        <div class="code-container">
+            <div class="line"
+                 v-for="i in instructions"
+                 :style="{ backgroundColor: breakpointSet.has(i.address) ? 'rgba(255,0,0,0.3)' : ''}"
             >
-                <i v-if="simLocation==i.address" class="fa fa-arrow-right"/>
+                <div class="line-ptr"
+                     @click="handleLineClick($event, i.address)"
+                >
+                    <i v-if="simLocation==i.address" class="fa fa-arrow-right"/>
+                </div>
+
+                <div class="line-number"
+                     @click="handleLineClick($event, i.address)"
+                >
+                    <span>{{i.address.toString(16)}}</span>
+                </div>
+
+                <span class="line-text"
+                      :id = "'asm-table-col-'+i.address"
+                      @mouseenter="mouseEnter(printInstructionPopup(i.opcodeId), i.address)"
+                      @mouseleave="mouseLeave()"
+
+                >
+                    {{printInstruction(i)}}
+                </span>
             </div>
 
-            <div class="line-number"
-                 @click="handleLineClick($event, i.address)"
-            >
-                <span>{{i.address.toString(16)}}</span>
-            </div>
-
-            <span class="line-text"
-                  :id = "'asm-table-col-'+i.address"
-                  @mouseenter="mouseEnter(printInstructionPopup(i.opcodeId), i.address)"
-                  @mouseleave="mouseLeave()"
-
-            >
-                {{printInstruction(i)}}
-            </span>
         </div>
-
+        <div id="asm-popup" class="popup">
+        </div>
+        <<!--<button class = "applyButton" @click="applyChanges()" id="asm-apply-changes-button" disabled> apply changes</button>
+        <button class = "clearButton" @click="clearTable()" id="asm-clear-button"> clear table</button>-->
     </div>
-    <div id="asm-popup" class="popup">
-    </div>
-    <<!--<button class = "applyButton" @click="applyChanges()" id="asm-apply-changes-button" disabled> apply changes</button>
-    <button class = "clearButton" @click="clearTable()" id="asm-clear-button"> clear table</button>-->
 </template>
 
 <style scoped>

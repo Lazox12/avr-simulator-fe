@@ -55,50 +55,51 @@ function watchListUpdate() {
 </script>
 
 <template>
-    <div class="body">
-        <div class="format-select">
-            <h4 style="margin-left: auto">display format:</h4>
-            <select v-model="selectedFormat" style = "width:60px;height:40px">
-                <option selected value="hex">hex</option>
-                <option value="dec">dec</option>
-                <option value="bin">bin</option>
+    <div><!-- wrapper -->
+        <div class="body">
+            <div class="format-select">
+                <h4 style="margin-left: auto">display format:</h4>
+                <select v-model="selectedFormat" style = "width:60px;height:40px">
+                    <option selected value="hex">hex</option>
+                    <option value="dec">dec</option>
+                    <option value="bin">bin</option>
 
-            </select>
-        </div>
-        <br>
-        <div class="register-grid">
-            <div
-                class="register-cell"
-                v-for="(val, i) in formattedRegisters"
-                :key="i"
-            >
-                <div class="reg-header">R{{ i }}</div>
-                <div class="reg-value">{{ val }}</div>
+                </select>
+            </div>
+            <br>
+            <div class="register-grid">
+                <div
+                    class="register-cell"
+                    v-for="(val, i) in formattedRegisters"
+                    :key="i"
+                >
+                    <div class="reg-header">R{{ i }}</div>
+                    <div class="reg-value">{{ val }}</div>
+                </div>
             </div>
         </div>
+
+        <div class="watchlist">
+            <h4>enter regiter to watch:</h4>
+            <input class="watchlist-input" style="height:30px" v-model="input">
+            <button @click="watchListUpdate()">watch</button>
+        </div>
+        <table class="watch-table">
+            <thead>
+                <tr>
+                    <th>variable</th>
+                    <th>value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(value) in formatedWatchedRegisters">
+                    <th>{{value[0]}}</th>
+                    <td>{{value[1]}}</td>
+
+                </tr>
+            </tbody>
+        </table>
     </div>
-
-    <div class="watchlist">
-        <h4>enter regiter to watch:</h4>
-        <input class="watchlist-input" style="height:30px" v-model="input">
-        <button @click="watchListUpdate()">watch</button>
-    </div>
-    <table class="watch-table">
-        <thead>
-            <tr>
-                <th>variable</th>
-                <th>value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="(value) in formatedWatchedRegisters">
-                <th>{{value[0]}}</th>
-                <td>{{value[1]}}</td>
-
-            </tr>
-        </tbody>
-    </table>
-
 </template>
 
 <style scoped>

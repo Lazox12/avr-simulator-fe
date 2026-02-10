@@ -2,12 +2,11 @@
 import Home from "@/components/home/Home.vue";
 import Asm from "@/components/asm/Asm.vue";
 import Sim from "@/components/Sim.vue";
-import {computed, ref, watch} from "vue";
+import {ref, watch} from "vue";
 import {execute} from "@/command_service.ts";
 import {ListenerService} from "@/listener_service.ts";
 import {message} from "@tauri-apps/plugin-dialog";
 
-// Use 'any' or Component type if available
 const windows: Record<string, any> = { "Home": Home, "Assembly": Asm, "sim": Sim };
 const active = ref("Home");
 let sim_status = ListenerService.instance.listen<string>("sim-status","")

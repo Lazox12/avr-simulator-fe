@@ -73,7 +73,9 @@ async function onSkipClick() {
         <main id="main" class="main">
             <!-- The component will now fill this space -->
             <suspense class="component-view">
-            <component :is="windows[active]"/>
+                <KeepAlive>
+                    <component :is="windows[active]"/>
+                </KeepAlive>
             </suspense>
         </main>
 

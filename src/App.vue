@@ -12,6 +12,7 @@ const active = ref("Home");
 let sim_status = ListenerService.instance.listen<string>("sim-status","")
 let error = ListenerService.instance.listen<string>("error","")
 let sim_state = ListenerService.instance.listen<string>("sim_state", "No Data")
+let project_state = ListenerService.instance.listen<string>("project_state", "No Data")
 
 function setActive(key: string) {
     active.value = key;
@@ -63,7 +64,7 @@ async function onSkipClick() {
                 </button>
             </div>
             <div class="control-buttons">
-                <p style="margin: auto 0 auto 0">Sim status:{{sim_state}}</p>
+
                 <button id="button-pause" class="button button-control" @click="onPauseClick" title="run/pause the debuger"><i id="button-pause-i" class="fa fa-pause"/></button>
                 <button id="button-next" class="button button-control" @click="onNextClick" title="next instruction"><i class="fa fa-arrow-circle-down" /></button>
                 <button id="button-over" class="button button-control" @click="onSkipClick" title="skip entire function (only on call)"><i class="fa fa-fast-forward"/></button>
@@ -77,7 +78,9 @@ async function onSkipClick() {
         </main>
 
         <footer class="footer">
-            <p>test</p>
+            <p style="margin: auto 10px auto 0">Sim status:{{sim_state}}</p>
+
+            <p style="margin: auto 0 auto 10px">project:{{project_state.length==0? "None":project_state}}</p>
         </footer>
     </div>
 </template>

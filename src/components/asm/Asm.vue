@@ -180,18 +180,29 @@ function printComment(i:PartialInstruction):string|undefined{
 
 function printInstruction(instruction: PartialInstruction):string{
     let toReturn = "";
+    toReturn+="<p "
+    toReturn+='style="display:inline" '
+    toReturn+='@mouseenter="mouseEnter(printInstructionPopup(i.opcodeId), i.address) " '
+    toReturn+='@mouseleave="mouseLeave() ">'
     toReturn+=getInstruction(instruction.opcodeId)?.name
-    toReturn+=" "
+    toReturn+=" </p>"
     if (instruction.operands!==null){
         for (let op of instruction.operands){
             if(op.operandInfo!=null){
+                toReturn+="<p "
+                toReturn+='style="display:inline"'
+                toReturn+='@mouseenter="mouseEnter(printInstructionPopup(i.opcodeId), i.address) "'
+                toReturn+='@mouseleave="mouseLeave() ">'
                 toReturn+=op.operandInfo.registerName;
+                toReturn+=",</p>"
             }else{
+                toReturn+="<p "
+                toReturn+='style="display:inline">'
                 toReturn +=printOperandValue(op);
+                toReturn+=",</p>"
             }
-            toReturn+=","
         }
-        toReturn =toReturn.substring(0, toReturn.length - 1); // remove last ,
+        //toReturn =toReturn.substring(0, toReturn.length - 1); // remove last ,
     }
     toReturn+= printComment(instruction);
     toReturn+="\n"
@@ -286,14 +297,10 @@ watch(simLocation, (value)=>{
                     <span>{{i.address.toString(16)}}</span>
                 </div>
 
-                <span class="line-text"
+                <div class="line-text"
                       :id = "'asm-table-col-'+i.address"
-                      @mouseenter="mouseEnter(printInstructionPopup(i.opcodeId), i.address)"
-                      @mouseleave="mouseLeave()"
-
-                >
-                    {{printInstruction(i)}}
-                </span>
+                     v-html="printInstruction(i)"
+                />
             </div>
 
         </div>

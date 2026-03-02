@@ -14,6 +14,7 @@ const breakpointSet = computed(() => new Set(breakpoints.value));
 let hoverTimeout :any|null = null;
 
 onMounted(async () => {
+    console.log("mounted")
     const list = await execute<RawInstruction[]>("get_instruction_list",undefined,true);
     if(list) {
         instructionList.value = list;
@@ -140,12 +141,14 @@ function printOperandValue(op:Operand|undefined):string{
             if (op.value==1){
                 return String("+");
             }
-            if (op.value==1){
+            if (op.value==2){
                 return String("-");
+            }if (op.value==0){
+                return String("")
             }
         }
         default:{
-            return 'error invild constraint:'+op.constraint;
+            return 'error invild constraint:'+op.constraint+" "+op.value;
         }
     }
 }
@@ -231,6 +234,21 @@ function handleLineClick(event:MouseEvent,address:number):void{
     execute("sim_action", {action:{break:address}});
 }
 
+function scrollTo(value:number){
+    console.log("scrolling to "+value.toString(16));
+    let e = document.getElementById('line:'+value);
+    if (e===null||e===undefined){
+        throw "invalid number:"+value
+    }
+    e.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
+watch(simLocation, (value)=>{
+    scrollTo(value)
+})
 
 </script>
 
@@ -238,6 +256,7 @@ function handleLineClick(event:MouseEvent,address:number):void{
     <div><!-- wrapper -->
         <div class="code-container">
             <div class="line"
+                 :id = "'line:'+i.address"
                  v-for="i in instructions"
                  :style="{ backgroundColor: breakpointSet.has(i.address) ? 'rgba(255,0,0,0.3)' : ''}"
             >

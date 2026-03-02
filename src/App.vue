@@ -16,6 +16,7 @@ let project_state = ListenerService.instance.listen<string>("project_state", "No
 
 function setActive(key: string) {
     active.value = key;
+    document.dispatchEvent(new Event('visibilitychange'));
 }
 watch(error,(value) => {
     message(value as string,{title:"error:",kind:"error"});

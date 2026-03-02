@@ -13,8 +13,16 @@ const instructionList = ref<RawInstruction[]>([]);
 const breakpointSet = computed(() => new Set(breakpoints.value));
 let hoverTimeout :any|null = null;
 
+const handleVisibilityChange = () => {
+    console.log("aehughsearof")
+    if (document.visibilityState === 'visible') {
+        // Adding a tiny timeout helps ensure the browser has fully re-rendered
+        setTimeout(()=>{scrollTo(simLocation.value,true)}, 0);
+    }
+};
+
 onMounted(async () => {
-    console.log("mounted")
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     const list = await execute<RawInstruction[]>("get_instruction_list",undefined,true);
     if(list) {
         instructionList.value = list;
@@ -234,16 +242,22 @@ function handleLineClick(event:MouseEvent,address:number):void{
     execute("sim_action", {action:{break:address}});
 }
 
-function scrollTo(value:number){
+function scrollTo(value:number,instant:boolean=false):void{
     console.log("scrolling to "+value.toString(16));
     let e = document.getElementById('line:'+value);
     if (e===null||e===undefined){
         throw "invalid number:"+value
     }
-    e.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-    });
+    if(instant){
+        e.scrollIntoView({
+            block: "center"
+        });
+    }else{
+        e.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }
 }
 
 watch(simLocation, (value)=>{

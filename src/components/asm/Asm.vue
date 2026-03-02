@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Operand, PartialInstruction, RawInstruction} from '@/structs.ts';
+import {Operand, OperandInfo, PartialInstruction, RawInstruction} from '@/structs.ts';
 import {ListenerService} from "@/listener_service.ts";
 import {computed, ref, watch, onMounted} from "vue"; // Add onMounted
 import {execute} from "@/command_service.ts";
@@ -248,6 +248,10 @@ async function printInstructionPopup(opcode_id:number):Promise<string>{
     return `<p style="display: flex"">Description: ${i?.description}<br> Action: ${i?.action}</p>`;
 
 }
+async function printOperandPopup(data:OperandInfo,address:number):Promise<string>{
+    return `<p style="display: flex"">Description: ${data.description}<br> Register address: 0x${address.toString(16).toUpperCase()}</p>`;
+
+}
 
 function handleLineClick(event:MouseEvent,address:number):void{
     execute("sim_action", {action:{break:address}});
@@ -297,10 +301,32 @@ watch(simLocation, (value)=>{
                     <span>{{i.address.toString(16)}}</span>
                 </div>
 
-                <div class="line-text"
-                      :id = "'asm-table-col-'+i.address"
-                     v-html="printInstruction(i)"
-                />
+                <span class="line-text" :id="'asm-table-col-'+i.address">
+                    <span
+                        @mouseenter="mouseEnter(printInstructionPopup(i.opcodeId), i.address)"
+                        @mouseleave="mouseLeave()"
+                    >
+                        {{ getInstruction(i.opcodeId)?.name }}
+                    </span>
+                    <span v-if="i.operands !== null">
+                        <span>&nbsp;</span>
+                        <template v-for="(op, index) in i.operands" :key="index">
+                            <span
+                                v-if="op.operandInfo!=null"
+                                @mouseenter="mouseEnter(printOperandPopup(op.operandInfo,op.value), i.address)"
+                                @mouseleave="mouseLeave()"
+                            >{{ op.operandInfo.registerName }}</span>
+                            <span v-else
+                            >
+                                {{printOperandValue(op)}}
+                            </span>
+                            <span v-if="index < i.operands.length - 1">,</span>
+                        </template>
+                    </span>
+
+                    <span>{{ printComment(i) || "" }}</span>
+                    {{ "\n" }}
+                </span>
             </div>
 
         </div>
